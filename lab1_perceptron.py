@@ -10,7 +10,7 @@ import numpy as np
 
 
 # загружаем и подготавляваем данные
-df = pd.read_csv('data.csv')
+df = pd.read_csv('data1.csv')
 
 df = df.iloc[np.random.permutation(len(df))]
 y = df.iloc[0:100, 4].values
@@ -49,6 +49,8 @@ n_iter = 1000  # Максимальное количество итераций
 eta = 0.01
 prev_errors = []  # Хранение предыдущих значений ошибки для определения сходимости
 tolerance = 1e-6  # Задаем порог сходимости
+prev_weights = None
+weights_tolerance = 1e-5
 for i in range(n_iter):
     errors = []  # Список ошибок на каждой итерации
     for xi, target in zip(X, y):
@@ -56,10 +58,19 @@ for i in range(n_iter):
         Wout[1:] += ((eta * (target - pr)) * hidden).reshape(-1, 1)
         Wout[0] += eta * (target - pr)
         errors.append(np.mean((target - pr) ** 2))
+    # нужно добавить также условия по весам
     if len(prev_errors) > 0 and np.abs(np.mean(errors) - np.mean(prev_errors)) < tolerance:
         print(f"Алгоритм сошелся на итерации {i+1}")
         break
+    
+    # проверяем сходимость по весам
+    if prev_weights is not None and np.allclose(Wout, prev_weights, atol=weights_tolerance):
+        print(f"Алгоритм сошелся по весам на итерации {i+1}")
+        break
+    
+    
     prev_errors = errors[:]
+    prev_weights = Wout.copy()
 
 # посчитаем сколько ошибок делаем на всей выборке
 y = df.iloc[:, 4].values
