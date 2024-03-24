@@ -1,6 +1,10 @@
 import torch
+import pandas as pd
 import torch.nn as nn
 import torch.nn.functional as F
+import random
+
+df = pd.read_csv('data2.csv')
 
 class MultiLayerPerceptron(nn.Module):
     def __init__(self, in_size, hidden_sizes, out_size):
@@ -19,10 +23,16 @@ class MultiLayerPerceptron(nn.Module):
         x = self.output(x)
         return x
 
-# Создаем модель с функцией активации ReLU
-input_size = 10
-hidden_sizes = [20, 30, 40]
-output_size = 5
+# Возьмем первую строку данных, чтобы определить размеры входного и выходного слоев
+sample_row = df.iloc[0]
+input_size = len(sample_row) - 1  # Размер входного слоя (количество признаков)
+output_size = len(df.iloc[:, -1].unique())  # Размер выходного слоя (количество классов)
+
+# Теперь определим размеры скрытых слоев
+# В качестве примера, возьмем случайное количество скрытых слоев от 1 до 3
+num_hidden_layers = random.randint(1, 3)
+hidden_sizes = [random.randint(10, 50) for _ in range(num_hidden_layers)]
+
 model_relu = MultiLayerPerceptron(input_size, hidden_sizes, output_size)
 
 # Создаем модель с функцией активации Sigmoid
